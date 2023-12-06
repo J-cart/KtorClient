@@ -69,13 +69,13 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0"
 
 
-    // define a okhttp BOM and its version
+   /* // define a okhttp BOM and its version
     implementation(platform("com.squareup.okhttp3:okhttp-bom:4.9.3"))
 
     // define any required OkHttp artifacts without version
     implementation("com.squareup.okhttp3:okhttp")
     implementation("com.squareup.okhttp3:logging-interceptor")
-
+*/
     implementation 'com.google.code.gson:gson:2.8.6'
 
 
