@@ -1,5 +1,6 @@
 package com.tutorials.ktorclient.ui
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -24,7 +25,9 @@ class CreatePostActivity : AppCompatActivity() {
             createPost()
         }
         binding.getPostBtn.setOnClickListener {
-            getPost(false)
+            Intent(this@CreatePostActivity, SocketActivity::class.java).apply {
+                startActivity(this)
+            }
         }
 
     }

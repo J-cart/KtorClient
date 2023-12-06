@@ -15,6 +15,9 @@
         android:theme="@style/Theme.KtorClient"
         tools:targetApi="31">
         <activity
+            android:name=".ui.SocketActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.CreatePostActivity"
             android:exported="false" />
         <activity
