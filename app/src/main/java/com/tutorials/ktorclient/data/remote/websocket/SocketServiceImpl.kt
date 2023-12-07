@@ -32,18 +32,6 @@ class SocketServiceImpl {
             contentConverter = KotlinxWebsocketSerializationConverter(Json)
         }
 
-        /*defaultRequest {
-            contentType(ContentType.Application.Json)
-        }
-        install(ContentNegotiation) {
-            json(
-                Json {
-                    ignoreUnknownKeys = true
-                    isLenient = true
-                }
-            )
-        }*/
-
     }
 
 
