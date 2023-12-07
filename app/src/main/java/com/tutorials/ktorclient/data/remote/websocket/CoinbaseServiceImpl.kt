@@ -5,18 +5,13 @@ import com.tutorials.ktorclient.data.remote.websocket.helper.Crypto
 import com.tutorials.ktorclient.data.remote.websocket.model.Subscribe
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.plugins.websocket.DefaultClientWebSocketSession
 import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.client.plugins.websocket.sendSerialized
 import io.ktor.client.plugins.websocket.webSocket
-import io.ktor.http.ContentType
-import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.KotlinxWebsocketSerializationConverter
-import io.ktor.serialization.kotlinx.json.json
 import io.ktor.websocket.Frame
 import io.ktor.websocket.closeExceptionally
 import io.ktor.websocket.readText
@@ -40,7 +35,7 @@ class CoinbaseServiceImpl {
             contentConverter = KotlinxWebsocketSerializationConverter(Json)
         }
 
-        defaultRequest {
+       /* defaultRequest {
             contentType(ContentType.Application.Json)
         }
 
@@ -51,17 +46,29 @@ class CoinbaseServiceImpl {
                     isLenient = true
                 }
             )
-        }
+        }*/
 
     }
 
 
-    suspend fun connectToCoinbase(onConnect:suspend () -> Unit) {
+    suspend fun connectToCoinbase(onConnect:suspend (DefaultClientWebSocketSession) -> Unit) {
         try {
             api.webSocket(COINBASE_URL) {
                 if (isActive) {
                     coinSocket = this
-                    onConnect()
+                    onConnect(this)
+                    /*
+                    seems observing directly in the scope of this init block works, check the usage in SocketActivity.kt
+                    */
+                    /*WORKS
+                    incoming.receiveAsFlow().collect{
+                        Log.d("JOEKTORCLIENT", "TOP INCOMING: $it")
+                    }*/
+
+                    /*WORKS
+                    receiveIncomingData(this).collect{
+                        Log.d("JOEKTORCLIENT", "TOP INCOMING: $it")
+                    }*/
                     Log.d("JOEKTORCLIENT", "Success Connecting Socket")
                     return@webSocket
                 }
@@ -90,20 +97,34 @@ class CoinbaseServiceImpl {
         }
     }
 
-     fun receiveIncomingData(): Flow<String> =
+    //This works if placed in the websocket init block also check its usage in SocketActivity.kt
+    fun receiveIncomingData(): Flow<String> =
         try {
             coinSocket?.let { cs ->
                 Log.d("JOEKTORCLIENT", "Success Subscribing Socket")
                 cs.incoming.receiveAsFlow().filter { it is Frame.Text }
                     .map {
-                       val text = (it as Frame.Text).readText()
-                        Json.decodeFromString(text)
+                        (it as Frame.Text).readText()//format the data to fit your usecase
                     }
             } ?: flow { "Nullable error" }
         } catch (e: Exception) {
             Log.d("JOEKTORCLIENT", "Error receiving message: $e")
             flow { "BIG ERROR: Some error: ${e.message}" }
         }
+
+    //This works if placed in the websocket init block also check its usage in SocketActivity.kt
+     fun receiveIncomingData(socket: DefaultClientWebSocketSession): Flow<String> =
+        try {
+            Log.d("JOEKTORCLIENT", "Success Subscribing Socket")
+            socket.incoming.receiveAsFlow().filter { it is Frame.Text }
+                .map {
+                    (it as Frame.Text).readText()//format the data to fit your usecase
+                }
+        } catch (e: Exception) {
+            Log.d("JOEKTORCLIENT", "Error receiving message: $e")
+            flow { "BIG ERROR: Some error: ${e.message}" }
+        }
+
 
     suspend fun closeSocket() {
         try {

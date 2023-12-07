@@ -19,12 +19,26 @@ class SocketActivity : AppCompatActivity() {
 
 
 
-      /* KTOR  COINBASE
+/* KTOR COINBASE
+
       binding.connectBtn.setOnClickListener {
             lifecycleScope.launch {
                 socketService.connectToCoinbase {
                     socketService.subscribeToCoinbase()
-                    observeResults()
+                    */
+/*Works
+                    socketService.receiveIncomingData(it).collect{value->
+                        Log.d("JOEKTORCLIENT", "..observing->$value")
+                    }*//*
+
+                    */
+/*Works
+                    socketService.receiveIncomingData().collect {
+                        binding.resultText.text = it
+                    }*//*
+
+
+
                 }
             }
         }
@@ -33,12 +47,21 @@ class SocketActivity : AppCompatActivity() {
             lifecycleScope.launch {
                 socketService.closeSocket()
             }
-        }*/
+        }
+*/
 
-       binding.connectBtn.setOnClickListener {
+
+
+
+        binding.connectBtn.setOnClickListener {
             lifecycleScope.launch {
                 socketService.connectToSocket {
-                    observeResults()
+//                        socketService.receiveIncomingData2()
+                    socketService.receiveIncomingData().collect {
+                        binding.resultText.text = it
+                    }
+
+
                 }
             }
         }
@@ -59,15 +82,6 @@ class SocketActivity : AppCompatActivity() {
                 socketService.sendToSocket(text)
             }
         }
-    }
-
-    private fun observeResults() {
-        lifecycleScope.launch {
-            socketService.receiveIncomingData().collect {
-                binding.resultText.text = it
-            }
-        }
 
     }
-
 }
