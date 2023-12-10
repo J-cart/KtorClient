@@ -3,14 +3,17 @@ package com.tutorials.ktorclient.ui
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.tutorials.ktorclient.data.remote.websocket.SocketServiceImpl
+import com.tutorials.ktorclient.data.remote.websocket.helper.Constant
+import com.tutorials.ktorclient.data.remote.websocket.jagha.ConnectionState
+import com.tutorials.ktorclient.data.remote.websocket.jagha.JaghaServiceImpl
+import com.tutorials.ktorclient.data.remote.websocket.jagha.request.UserProfileRequest
 import com.tutorials.ktorclient.databinding.ActivitySocketBinding
 import kotlinx.coroutines.launch
 
 class SocketActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySocketBinding
-//    private val socketService = CoinbaseServiceImpl()
-    private val socketService = SocketServiceImpl()
+    private val socketService = JaghaServiceImpl()
+//    private val newScope = CoroutineScope(Dispatchers.Main)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -18,49 +21,50 @@ class SocketActivity : AppCompatActivity() {
         setContentView(binding.root)
 
 
-
-/* KTOR COINBASE
-
-      binding.connectBtn.setOnClickListener {
-            lifecycleScope.launch {
-                socketService.connectToCoinbase {
-                    socketService.subscribeToCoinbase()
-                    */
-/*Works
-                    socketService.receiveIncomingData(it).collect{value->
-                        Log.d("JOEKTORCLIENT", "..observing->$value")
-                    }*//*
-
-                    */
-/*Works
-                    socketService.receiveIncomingData().collect {
-                        binding.resultText.text = it
-                    }*//*
-
-
+        lifecycleScope.launch {
+            socketService.connectionState.collect{state->
+                when(state){
+                    ConnectionState.IDLE->{
+                        binding.errorText.text = "Idle"
+                    }
+                    ConnectionState.CONNECTING->{
+                        binding.errorText.text = "Connecting"
+                    }
+                    ConnectionState.NOT_CONNECTED->{
+                        binding.errorText.text = "Not Connected"
+                    }
+                    ConnectionState.CONNECTED->{
+                        binding.errorText.text = "Connected"
+                    }
+                    ConnectionState.DISCONNECTING->{
+                        binding.errorText.text = "Disconnecting"
+                    }
+                    ConnectionState.DISCONNECTED->{
+                        binding.errorText.text = "Disconnected"
+                    }
+                    ConnectionState.NOT_DISCONNECTED->{
+                        binding.errorText.text = "Disconnected"
+                    }
+                    ConnectionState.SENDING->{
+                        binding.errorText.text = "Sending"
+                    }
+                    ConnectionState.SENT->{
+                        binding.errorText.text = "Sent"
+                    }
+                    ConnectionState.NOT_SENT->{
+                        binding.errorText.text = "Not sent"
+                    }
 
                 }
             }
         }
 
-        binding.disconnectBtn.setOnClickListener {
-            lifecycleScope.launch {
-                socketService.closeSocket()
-            }
-        }
-*/
-
-
-
-
         binding.connectBtn.setOnClickListener {
             lifecycleScope.launch {
-                socketService.connectToSocket {
-//                        socketService.receiveIncomingData2()
+                socketService.initConnection {
                     socketService.receiveIncomingData().collect {
                         binding.resultText.text = it
                     }
-
 
                 }
             }
@@ -73,15 +77,13 @@ class SocketActivity : AppCompatActivity() {
         }
 
         binding.sendPostBtn.setOnClickListener {
-            val text = binding.bodyEdt.text.toString().trim()
-            if (text.isEmpty()){
-                return@setOnClickListener
-            }
-
             lifecycleScope.launch {
-                socketService.sendToSocket(text)
+
+                val request = UserProfileRequest(
+                    message_type = Constant.MessageType.getUser
+                )
+                socketService.getUser(request)
             }
         }
-
     }
 }
