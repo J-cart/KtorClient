@@ -1,6 +1,5 @@
 package com.tutorials.ktorclient.data.remote.websocket.jagha.request
 
-import com.tutorials.ktorclient.data.remote.websocket.helper.Constant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -10,5 +9,5 @@ data class ConnectPlaceChatRequest(
     val placeId: String,
 
     @SerialName("message_type")
-    val messageType: String = Constant.MessageType.connectPlaceChat,
+    val messageType: String ,
 )

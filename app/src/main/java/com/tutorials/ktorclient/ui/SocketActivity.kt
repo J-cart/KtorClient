@@ -6,8 +6,10 @@ import androidx.lifecycle.lifecycleScope
 import com.tutorials.ktorclient.data.remote.websocket.helper.Constant
 import com.tutorials.ktorclient.data.remote.websocket.jagha.ConnectionState
 import com.tutorials.ktorclient.data.remote.websocket.jagha.JaghaServiceImpl
-import com.tutorials.ktorclient.data.remote.websocket.jagha.request.UserProfileRequest
+import com.tutorials.ktorclient.data.remote.websocket.jagha.request.ConnectPlaceChatRequest
+import com.tutorials.ktorclient.data.remote.websocket.jagha.request.DisconnectPlaceChatRequest
 import com.tutorials.ktorclient.databinding.ActivitySocketBinding
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class SocketActivity : AppCompatActivity() {
@@ -72,6 +74,12 @@ class SocketActivity : AppCompatActivity() {
 
         binding.disconnectBtn.setOnClickListener {
             lifecycleScope.launch {
+                val request = DisconnectPlaceChatRequest(
+                    messageType = Constant.MessageType.disconnectPlaceChat,
+                    placeId = "ChIJ1cVKtYLQxTsR0BA3yOadcTw"
+                )
+                socketService.disconnectPlaceChat(request)
+                delay(3000L)
                 socketService.closeSocket()
             }
         }
@@ -79,11 +87,40 @@ class SocketActivity : AppCompatActivity() {
         binding.sendPostBtn.setOnClickListener {
             lifecycleScope.launch {
 
-                val request = UserProfileRequest(
-                    message_type = Constant.MessageType.getUser
+                val request = ConnectPlaceChatRequest(
+                    messageType = Constant.MessageType.connectPlaceChat,
+                    placeId = "ChIJ1cVKtYLQxTsR0BA3yOadcTw"
                 )
-                socketService.getUser(request)
+                socketService.connectPlaceChat(request)
             }
         }
     }
 }
+
+/* KTOR COINBASE
+
+        binding.connectBtn.setOnClickListener {
+            lifecycleScope.launch {
+                socketService.connectToCoinbase {
+                    socketService.subscribeToCoinbase()
+
+                    socketService.receiveIncomingData(it).collect { value ->
+                        Log.d("JOEKTORCLIENT", "..observing->$value")
+                    }
+
+
+                    socketService.receiveIncomingData().collect {
+                        binding.resultText.text = it
+                    }
+
+
+                }
+            }
+        }
+
+        binding.disconnectBtn.setOnClickListener {
+            lifecycleScope.launch {
+                socketService.closeSocket()
+            }
+        }
+*/
