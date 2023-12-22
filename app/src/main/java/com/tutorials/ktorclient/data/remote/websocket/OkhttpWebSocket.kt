@@ -1,6 +1,8 @@
 package com.tutorials.ktorclient.data.remote.websocket
 
 import android.util.Log
+import com.google.gson.Gson
+import com.tutorials.ktorclient.data.remote.jagha.model.request.ConnectPlaceChatRequest
 import kotlinx.coroutines.flow.MutableStateFlow
 import okhttp3.Response
 import okhttp3.WebSocket
@@ -41,5 +43,13 @@ class OkhttpWebSocket: WebSocketListener() {
     override fun onOpen(webSocket: WebSocket, response: Response) {
         super.onOpen(webSocket, response)
         Log.d("JOEKTORCLIENT", "on open Socket: response -> $response")
+        val data = ConnectPlaceChatRequest(
+            message_type = "connect_place_chat",
+            place_id = "ChIJ1cVKtYLQxTsR0BA3yOadcTw"
+        )
+
+        val json = Gson().toJson(data)
+        Log.d("JOEKTORCLIENT", "json-> $json")
+        webSocket.send(json)
     }
 }

@@ -4,10 +4,11 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.google.gson.Gson
+import com.tutorials.ktorclient.data.remote.jagha.constants.Constant
+import com.tutorials.ktorclient.data.remote.jagha.constants.Constant.BASE_WEBSOCKET_URL
+import com.tutorials.ktorclient.data.remote.jagha.model.request.ConnectPlaceChatRequest
 import com.tutorials.ktorclient.data.remote.websocket.OkhttpWebSocket
 import com.tutorials.ktorclient.data.remote.websocket.SocketServiceImpl
-import com.tutorials.ktorclient.data.remote.websocket.helper.Crypto
-import com.tutorials.ktorclient.data.remote.websocket.model.Subscribe
 import com.tutorials.ktorclient.databinding.ActivitySocketBinding
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
@@ -29,7 +30,7 @@ class SocketActivity : AppCompatActivity() {
 
         val client = OkHttpClient()
         val request = Request.Builder()
-            .url(COINBASE_URL)
+            .url(BASE_WEBSOCKET_URL)
             .build()
         val listener = OkhttpWebSocket()
         binding.connectBtn.setOnClickListener {
@@ -37,12 +38,10 @@ class SocketActivity : AppCompatActivity() {
         }
 
         binding.sendPostBtn.setOnClickListener {
-
-           val data = Subscribe(
-                "subscribe",
-                Crypto.values().map { it.id },
-                listOf("ticker")
-            )
+           val data = ConnectPlaceChatRequest(
+               message_type = Constant.MessageType.connectPlaceChat,
+               place_id = "ChIJ1cVKtYLQxTsR0BA3yOadcTw"
+           )
 
             val json = Gson().toJson(data)
 
@@ -138,6 +137,38 @@ class SocketActivity : AppCompatActivity() {
             }
         }
 
+    }
+
+    //refactored format ...
+    private fun okhttpJagha(){
+        val client = OkHttpClient()
+        val request = Request.Builder()
+            .url(BASE_WEBSOCKET_URL)
+            .build()
+        val listener = OkhttpWebSocket()
+        binding.connectBtn.setOnClickListener {
+            webSocket = client.newWebSocket(request,listener)
+        }
+
+        binding.sendPostBtn.setOnClickListener {
+            val data = ConnectPlaceChatRequest(
+                message_type = Constant.MessageType.connectPlaceChat,
+                place_id = "ChIJ1cVKtYLQxTsR0BA3yOadcTw"
+            )
+
+            val json = Gson().toJson(data)
+
+            lifecycleScope.launch {
+                webSocket.send(json)
+            }
+        }
+
+        binding.disconnectBtn.setOnClickListener {
+            lifecycleScope.launch {
+                webSocket.close(1000,"Close by user")
+            }
+        }
+        observeResultsFlow(listener)
     }
 
 }
